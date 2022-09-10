@@ -5,3 +5,4 @@ Data structures and algorithms project for [university course](https://tiralabra
 - [Implementation document](./documentation/implementation_doc.md)
 - [Testing document](./documentation/testing_doc.md)
 - [User guide](./documentation/user_guide_doc.md)
+- [Weekly reports](./documentation/weekly_reports/)
