@@ -1,0 +1,15 @@
+[[package]]
+name = "bitarray"
+version = "2.6.0"
+description = "efficient arrays of booleans -- C extension"
+category = "main"
+optional = false
+python-versions = "*"
+
+[metadata]
+lock-version = "1.1"
+python-versions = "^3.8"
+content-hash = "ac331389deeb0d2ee2a03cc01edc608b2eb04c6940c4df752988370dda9150f2"
+
+[metadata.files]
+bitarray = []
