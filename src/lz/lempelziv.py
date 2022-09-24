@@ -2,12 +2,12 @@ from sa import *
 from bitarray import bitarray
 from sa import MatchFinder
 
-class lz77:
+class LZ77:
     def __init__(self, input_file_path: str, output_file_path: str):
         self.input_file_path = input_file_path
         self.output_file_path = output_file_path
 
-    def compress(self):
+    def encode(self):
         self.input_data = self.read_input()
         self.mf = MatchFinder(self.input_data)
         buffer = bitarray(endian='big')
@@ -17,14 +17,23 @@ class lz77:
             match = self.mf.findLongestMatch(index)
 
             if match:
+                buffer.append(1) #flag bit
                 (dist, length) = match
-                buffer.append(True)
-                buffer.frombytes(bytes([dist >> 4]))
-                buffer.frombytes(bytes([((dist & 0xf) << 4) | length]))
+                #dist is 12bits so BITWISE SHIFT right 4
+                byte1 = bytes([dist >> 4])
+                buffer.frombytes(byte1)
+                #BITWISE AND to leave 4 smallest bits
+                #shift left and BITWISE OR to add length (4bits)
+                byte2 = bytes([
+                    ((dist & 15) << 4) 
+                    | length
+                ])
+                buffer.frombytes(byte2)
                 index += length
 
             else:
-                buffer.append(False)
+                buffer.append(0) #flag bit
+                #character
                 buffer.frombytes(bytes([self.input_data[index]]))
                 index += 1
 
@@ -32,7 +41,7 @@ class lz77:
 
         self.save_output(buffer)
 
-    def ddecompress(self):
+    def decode(self):
         data = bitarray(endian='big') 
         # data in bits and most significant bit first
         buffer = []
@@ -88,7 +97,6 @@ class lz77:
                 """
         
         output_byte_data = bytes(buffer)
-        print(output_byte_data)
 
         with open(self.output_file_path, "wb") as f:
             f.write(output_byte_data)

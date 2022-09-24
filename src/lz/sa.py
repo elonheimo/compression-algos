@@ -1,5 +1,4 @@
 from collections import defaultdict
-from turtle import right
 
 #https://github.com/benfulton/Algorithmic-Alley/blob/master/AlgorithmicAlley/SuffixArrays/sa.py
 class suffixArray:
