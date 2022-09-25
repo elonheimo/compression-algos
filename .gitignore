@@ -1,3 +1,6 @@
 test.py
 __pycache__
 /testing_files
+.coverage
+htmlcov
+.pytest_cache
