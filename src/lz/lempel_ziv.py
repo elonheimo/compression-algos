@@ -1,6 +1,5 @@
-from sa import *
 from bitarray import bitarray
-from sa import MatchFinder
+from . sa import MatchFinder
 
 class LZ77:
     def __init__(self, input_file_path: str, output_file_path: str):
