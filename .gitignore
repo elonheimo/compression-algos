@@ -3,3 +3,4 @@ __pycache__
 /testing_files
 .coverage
 .pytest_cache
+htmlcov
