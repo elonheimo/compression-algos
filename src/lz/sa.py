@@ -3,9 +3,9 @@ from collections import defaultdict
 # https://github.com/benfulton/Algorithmic-Alley/blob/master/AlgorithmicAlley/SuffixArrays/sa.py
 
 
-class suffixArray:
+class SuffixArray:
     @staticmethod
-    def suffix_array_ManberMyers(data):
+    def suffix_array_Manber_Myers(data):
         result = []
 
         def sort_bucket(input, bucket, order=1):
@@ -28,7 +28,7 @@ class MatchFinder:
         self.data = data
         self.sa_left = 0
         self.sa_right = 8000 if len(data) < 8000 else len(data)-1
-        self.sa = suffixArray.suffix_array_ManberMyers(
+        self.sa = SuffixArray.suffix_array_Manber_Myers(
             data[0: self.sa_right+1])
 
     def sa_ref(self, left, length=1):
@@ -38,17 +38,17 @@ class MatchFinder:
         #print(left, length, self.data[left: left+length])
         return self.data[left: left+length+1]
 
-    def findLongestMatch(self, i):
+    def find_longest_match(self, i):
         # init new suffix array if necessary
         if i >= self.sa_right and i != 0:
             self.sa_left = i - 4000
             self.sa_right = i + 4000
-            self.sa = suffixArray.suffix_array_ManberMyers(
+            self.sa = SuffixArray.suffix_array_Manber_Myers(
                 self.data[self.sa_left: self.sa_right + 1]
             )
 
         # find leftmost and rightmost match from search array
-        left, right = self.binarySearchLeftRight(i)
+        left, right = self.binary_search_left_right(i)
         # if no match
         if left == -1:
             return None
@@ -77,7 +77,7 @@ class MatchFinder:
 
         # search the longest matching pattern from the region
 
-    def binarySearchLeftRight(self, i):
+    def binary_search_left_right(self, i):
         left_ret, right_ret = -1, -1
         # search left
         l, r = 0, len(self.sa) - 1

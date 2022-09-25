@@ -15,7 +15,7 @@ class LZ77:
         while index < len(self.input_data):
             if index % 10000 == 0:
                 print(index)
-            match = self.mf.findLongestMatch(index)
+            match = self.mf.find_longest_match(index)
 
             if match:
                 buffer.append(1)  # flag bit
