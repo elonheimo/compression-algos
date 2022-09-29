@@ -5,19 +5,19 @@ from collections import defaultdict
 
 class SuffixArray:
     @staticmethod
-    def suffix_array_Manber_Myers(data):
+    def suffix_array_manber_myers(data):
         result = []
 
-        def sort_bucket(input, bucket, order=1):
-            d = defaultdict(list)
+        def sort_bucket(input_data, bucket, order=1):
+            dictionary = defaultdict(list)
             for i in bucket:
-                key = input[i:i+order]
-                d[key].append(i)
-            for k, v in sorted(d.items()):
-                if len(v) > 1:
-                    sort_bucket(input, v, order*2)
+                key = input_data[i:i+order]
+                dictionary[key].append(i)
+            for k, value in sorted(dictionary.items()): # pylint: disable= unused-variable
+                if len(value) > 1:
+                    sort_bucket(input_data, value, order*2)
                 else:
-                    result.append(v[0])
+                    result.append(value[0])
             return result
 
         return sort_bucket(data, (i for i in range(len(data))))
@@ -28,7 +28,7 @@ class MatchFinder:
         self.data = data
         self.sa_left = 0
         self.sa_right = 8000 if len(data) < 8000 else len(data)-1
-        self.sa = SuffixArray.suffix_array_Manber_Myers(
+        self.sa = SuffixArray.suffix_array_manber_myers(
             data[0: self.sa_right+1])
 
     def sa_ref(self, left, length=1):
@@ -43,7 +43,7 @@ class MatchFinder:
         if i >= self.sa_right and i != 0:
             self.sa_left = i - 4000
             self.sa_right = i + 4000
-            self.sa = SuffixArray.suffix_array_Manber_Myers(
+            self.sa = SuffixArray.suffix_array_manber_myers(
                 self.data[self.sa_left: self.sa_right + 1]
             )
 
