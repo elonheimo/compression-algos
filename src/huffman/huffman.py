@@ -96,6 +96,10 @@ class HuffmanCoding:
         helper(root)
         return route_buffer
 
+    def header_to_binarytree(self, data :bitarray) -> TreeNode:
+        for i in len(data):
+            pass
+
     def encode(self):
         input_data = self.read_input()
         freq_dict = self.frequency_dict(input_data)
