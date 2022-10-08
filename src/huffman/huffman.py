@@ -1,5 +1,6 @@
 from collections import defaultdict
 import heapq
+from typing import final
 from bitarray import bitarray
 
 
@@ -97,15 +98,49 @@ class HuffmanCoding:
         return route_buffer
 
     def header_to_binarytree(self, data :bitarray) -> TreeNode:
-        for i in len(data):
-            pass
+
+        def helper(node, i):
+            if data[i] == 0:
+                node.left = self.TreeNode(None, 0)
+                i = helper(
+                    node.left, i + 1
+                )
+                node.right = self.TreeNode(None, 0)
+                i = helper(
+                    node.right, i + 1
+                )
+            elif data[i] == 1:
+                #read one byte
+                i += 1
+                node.content = data[i: i+8]#.tobytes()
+                print(data[i: i+8].tobytes())
+                i += 7
+            return i
+
+        root= self.TreeNode(None, 0)
+        helper(root, i = 0)
+        return root
+
 
     def encode(self):
         input_data = self.read_input()
         freq_dict = self.frequency_dict(input_data)
         root_node = self.create_tree(freq_dict)
         huffman_codes = self.huffman_codes(root_node)
-        buffer = self.tree_to_bitarray(root_node)
+        temp_buffer = self.tree_to_bitarray(root_node)
         for byte in input_data:
-            buffer += huffman_codes[byte]
+            temp_buffer += huffman_codes[byte]
+        huffman_table_bitarray = self.tree_to_bitarray(root_node)
+        discard_bits = (
+            (len(huffman_table_bitarray)
+            + len(temp_buffer)
+            -1 )
+            % 8
+        )
+        final_bitarray = bitarray('')
+        final_bitarray.frombytes(
+            bytes([discard_bits])
+        )
+        final_bitarray = final_bitarray[5:]
+        final_bitarray += temp_buffer
         

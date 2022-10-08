@@ -6,6 +6,23 @@ class TestHuffmanCoding(unittest.TestCase):
     def setUp(self) -> None:
         return super().setUp()
 
+    def make_test_bitarray(self) -> bitarray:
+        #        / \
+        #      /\   /\
+        #    /\  c d  e
+        #   a  b
+        testbuffer = bitarray('0001')
+        testbuffer.frombytes(str.encode("A"))
+        testbuffer.append(1)
+        testbuffer.frombytes(str.encode("B"))
+        testbuffer.append(1)
+        testbuffer.frombytes(str.encode("C"))
+        testbuffer.extend([0,1])
+        testbuffer.frombytes(str.encode("D"))
+        testbuffer.append(1)
+        testbuffer.frombytes(str.encode("E"))
+        return testbuffer
+
     def test_tree_to_bitarray(self):
         huffman_coding = HuffmanCoding("","")
 
@@ -28,17 +45,17 @@ class TestHuffmanCoding(unittest.TestCase):
         root.right.right = huffman_coding.TreeNode(
             str.encode("E"), 0
         )
+        self.assertEqual(
+            self.make_test_bitarray(),
+            huffman_coding.tree_to_bitarray(root)
+        )
 
-        ret = huffman_coding.tree_to_bitarray(root)
-        testbuffer = bitarray('0001')
-        testbuffer.frombytes(str.encode("A"))
-        testbuffer.append(1)
-        testbuffer.frombytes(str.encode("B"))
-        testbuffer.append(1)
-        testbuffer.frombytes(str.encode("C"))
-        testbuffer.extend([0,1])
-        testbuffer.frombytes(str.encode("D"))
-        testbuffer.append(1)
-        testbuffer.frombytes(str.encode("E"))
-        print(ret)
-        self.assertEqual(testbuffer, ret)
+    def test_header_to_binarytree(self):
+        huffman_coding = HuffmanCoding("","")
+        test_buffer = self.make_test_bitarray()
+        root_from_test_buffer = huffman_coding.header_to_binarytree(test_buffer)
+        new_buffer = huffman_coding.tree_to_bitarray(root_from_test_buffer)
+        self.assertEqual(
+            test_buffer,
+            new_buffer
+        )
