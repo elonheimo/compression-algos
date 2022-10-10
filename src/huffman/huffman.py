@@ -30,9 +30,10 @@ class HuffmanCoding:
             def loop_layers(node, level) ->str:
                 if node.left:
                     loop_layers(node.left, level+1)
-                if node is not None:
-                    nonlocal ret
-                    ret += (' ' * 4 * level + '-> ' + str(node.content)+ "\n")
+
+                nonlocal ret
+                ret += (' ' * 4 * level + '-> ' + str(node.content)+ "\n")
+                
                 if node.right:
                     loop_layers(node.right, level+1)
             loop_layers(self, 0)
@@ -99,8 +100,6 @@ class HuffmanCoding:
         byte_to_code_dict = {}
 
         def dict_filler(parent, code :bitarray):
-            if not parent:
-                return
             if parent.content: #achieved leaf node
                 byte_to_code_dict[parent.content] = code
                 return

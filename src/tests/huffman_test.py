@@ -3,9 +3,6 @@ from bitarray import bitarray
 from huffman.huffman import HuffmanCoding
 
 class TestHuffmanCoding(unittest.TestCase):
-    def setUp(self) -> None:
-        return super().setUp()
-
     def make_test_bitarray(self) -> bitarray:
         #        / \
         #      /\   /\
@@ -46,6 +43,11 @@ class TestHuffmanCoding(unittest.TestCase):
         )
         return root
 
+    def test__str__(self):
+        self.assertEqual(
+            isinstance(str(self.make_test_tree()), str),
+            True
+        )
     def test_encode(self):
         input_path = "samples/munkki_kammio.txt"
         encoded = "testing_files/munkki_kammio.txt.hc"
