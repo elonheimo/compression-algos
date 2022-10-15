@@ -6,16 +6,14 @@ class LZ77:
     def __init__(self, input_file_path: str, output_file_path: str):
         self.input_file_path = input_file_path
         self.output_file_path = output_file_path
-        self.input_data = self.read_input()
-        self.match_finder = MatchFinder(self.input_data)
 
     def encode(self):
+        self.input_data = self.read_input()
+        match_finder = MatchFinder(self.input_data)
         buffer = bitarray(endian='big')
         index = 0
         while index < len(self.input_data):
-            if index % 10000 == 0:
-                print(index)
-            match = self.match_finder.find_longest_match(index)
+            match = match_finder.find_longest_match(index)
 
             if match:
                 buffer.append(1)  # flag bit
@@ -91,12 +89,6 @@ class LZ77:
                     buffer.append(
                         buffer[-relative_distance]
                     )
-                """
-                buffer.extend(
-                    buffer[ -relative_distance: -relative_distance + length]
-                )
-                """
-
         output_byte_data = bytes(buffer)
 
         with open(self.output_file_path, "wb") as f:
@@ -109,7 +101,7 @@ class LZ77:
             with open(self.input_file_path, 'rb') as input_file:
                 return input_file.read()
         except IOError:
-            print("could not open {file_path}")
+            print(f"could not open {self.input_file_path}")
 
     def save_output(self, buffer):
         try:
