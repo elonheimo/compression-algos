@@ -29,14 +29,13 @@ class MatchFinder:
         self.sa_left = 0
         self.sa_right = 8000 if len(data) < 8000 else len(data)-1
         self.sa = SuffixArray.suffix_array_manber_myers(
-            data[0: self.sa_right+1])
+            data[self.sa_left: self.sa_right+1]
+        )
 
-    def sa_ref(self, left, length=1):
-        # returns the real window from data array
-        # represented by search_array
-        left = self.sa_left + self.sa[left]
-        #print(left, length, self.data[left: left+length])
-        return self.data[left: left+length+1]
+    def sa_ref(self, i):
+        # Returns the real data corresponding to relative sa_left
+        # sa_left
+        return self.data[self.sa_left + i]
 
     def find_longest_match(self, i):
         # init new suffix array if necessary
@@ -46,9 +45,10 @@ class MatchFinder:
             self.sa = SuffixArray.suffix_array_manber_myers(
                 self.data[self.sa_left: self.sa_right + 1]
             )
-
+        #print("i",i,"sa", self.sa)
         # find leftmost and rightmost match from search array
         left, right = self.binary_search_left_right(i)
+        #print(left, right)
         # if no match
         if left == -1:
             return None
@@ -62,7 +62,7 @@ class MatchFinder:
                 for len_i in range(1, 15):
                     if len(self.data) <= i+length:
                         break  # new
-                    print("len", len(self.data), "i+l", i+length)  # new
+                    #print("len", len(self.data), "i+l", i+length)  # new
                     if self.data[i+length] == self.data[i-dist+length]:
                         if i+length < len(self.data):
                             length += 1
@@ -77,14 +77,13 @@ class MatchFinder:
 
         # search the longest matching pattern from the region
 
-    def binary_search_left_right(self, i):
+    def binary_search_left_right(self, i) -> tuple:
         left_ret, right_ret = -1, -1
         # search left
         l, r = 0, len(self.sa) - 1
         while l < r:
             m = (l + r) // 2
-            #print("left", l, "right", r, "i", i)
-            if self.sa_ref(m) < bytes(self.data[i]):
+            if self.sa_ref(m) < self.data[i]:
                 l = m + 1
             else:
                 r = m
@@ -95,7 +94,8 @@ class MatchFinder:
         l, r = 0, len(self.sa) - 1
         while l < r:
             m = (l + r) // 2 + 1
-            if self.sa_ref(m) > bytes(self.data[i]):
+            #print(self.data[i])
+            if self.sa_ref(m) > self.data[i]:
                 r = m - 1
             else:
                 l = m

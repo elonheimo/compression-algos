@@ -16,6 +16,7 @@ class LZ77:
             match = match_finder.find_longest_match(index)
 
             if match:
+                print("found match")
                 buffer.append(1)  # flag bit
                 (dist, length) = match
                 # dist is 12bits so BITWISE SHIFT right 4
