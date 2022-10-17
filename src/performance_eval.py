@@ -1,5 +1,6 @@
+from array import array
 import csv
-import os 
+import os
 import random
 import string
 import time
@@ -17,26 +18,38 @@ def start_performance_eval():
     if not os.path.exists("temp"):
         os.makedirs(f"{os.getcwd()}/temp")
     inputs, outputs = sample_paths()
-    print(inputs, outputs)
-    print("generating random files")
+    print("generating files with random bytes")
     rand_inputs, rand_outputs = generate_rand_byte_files()
     inputs.extend(rand_inputs)
     outputs.extend(rand_outputs)
     print("start evaluations")
-    rows = time_encode_decode(inputs, outputs)
+    rows = measure_preformances(inputs, outputs)
     write_to_csv(rows)
     print(*rows, sep="\n")
 
-def sample_paths():
+def sample_paths() -> tuple:
+    """Scans samples folder for files
+
+    Returns:
+        tuple: (inputs, outputs)
+        2 arrays in a tuple. Arrays contain input and output paths in order.
+
+    """
     inputs = os.listdir("samples")
     outputs = []
+    ## pylint: disable= consider-using-enumerate
     for i in range(len(inputs)):
         outputs.append(f"{os.getcwd()}/temp/{inputs[i]}")
         inputs[i] = f"{os.getcwd()}/samples/{inputs[i]}"
     return (inputs, outputs)
 
 def write_to_csv(rows):
-    with open("temp/performance_results.csv","a+") as csv_file:
+    """Writes the performance test results to csv-file.
+
+    Args:
+        rows : Two dimentional array containing performance result data
+    """
+    with open("temp/performance_results.csv","w", encoding='utf-8') as csv_file:
         writer = csv.writer(csv_file)
         writer.writerows(rows)
 
@@ -44,11 +57,17 @@ def generate_rand_byte_file(size, filename):
     chars = ''.join(
         [random.choice(string.printable) for i in range(size)]
     )
-    with open(filename, 'w') as f:
-        f.write(chars)
-        f.close()
+    with open(filename, 'w', encoding='utf-8') as rand_byte_file:
+        rand_byte_file.write(chars)
+        rand_byte_file.close()
 
-def generate_rand_byte_files():
+def generate_rand_byte_files() -> tuple:
+    """Generates files to /temp folder filled with random bytes.
+
+    Returns:
+        tuple: (inputs, outputs)
+        2 arrays in a tuple. Arrays contain input and output paths in order.
+    """
     input_paths = []
     output_paths = []
     for size in __n_bytes:
@@ -66,10 +85,27 @@ def generate_rand_byte_files():
     )
 
 
-def time_encode_decode(input_paths: list, output_paths: list):
+def measure_preformances(input_paths: list, output_paths: list) -> array:
+    """Loops through all input_files and measures performance.
+
+    Args:
+        input_paths (list): list of input paths 
+        output_paths (list): list of output paths
+
+    Returns:
+        array: two dimensional array of string to convert to save as .csv file
+    """
     rows = []
+    rows.append([
+        "file name",
+        "algorithm",
+        "encode time (s)",
+        "decode time (s)",
+        "size (KB)",
+        "compressed size(KB)",
+        "space saved (%)"
+    ])
     for (i, input_path) in enumerate(input_paths):
-        print(i, input_path, output_paths[i], "enum")
         rows.extend(
             encode_decode(
                 input_path,
@@ -78,15 +114,18 @@ def time_encode_decode(input_paths: list, output_paths: list):
         )
     return rows
 
-def encode_decode(input_path: str, output_path: str):
+def encode_decode(input_path: str, output_path: str) -> array:
+    """Performs encodes the input file and decodes. 
+    Measures time and file size and saves results to an array.
+
+    Args:
+        input_paths (list): list of input paths
+        output_paths (list): list of output paths
+
+    Returns:
+        array: two dimensional array of string to convert to save as .csv file
+    """
     rows = []
-    print(
-        [
-            input_path, f"{output_path}.hc"
-        ], [
-            f"{output_path}.hc", output_path
-        ]
-    )
     compressors = [
         (   
             HuffmanCoding(input_path, f"{output_path}.hc"),
@@ -99,7 +138,8 @@ def encode_decode(input_path: str, output_path: str):
     ]
     algo_names = ["Huffman", "lempel-ziv"]
     for i, ele in enumerate(compressors):
-        #| file        | algo         |encode time(s)|decode time(s)|size(KB)      | compressed size(KB)|space saving|
+        #row structure
+        #|file name|algorithm |encode time (s)|decode time (s)|size (KB)|compressed size(KB)|space saved (%)|
         row = [
             input_path.split("/")[-1],
             algo_names[i]
@@ -132,7 +172,7 @@ def encode_decode(input_path: str, output_path: str):
         )
         #space saving
         row.append(
-            str(round(1- int(row[-2]) / int(row[-1]),3)*100) + "%"
+            str(round(100- int(row[-1]) / int(row[-2])*100,3)) + "%"
         )
         del encoder
         del decoder
