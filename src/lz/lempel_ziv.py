@@ -1,4 +1,7 @@
+from sys import byteorder
 from bitarray import bitarray
+from bitarray.util import ba2int, make_endian
+from tqdm import tqdm
 from . sa import MatchFinder
 
 
@@ -12,30 +15,37 @@ class LZ77:
         match_finder = MatchFinder(self.input_data)
         buffer = bitarray(endian='big')
         index = 0
+        progress_bar = tqdm(total = len(self.input_data))
         while index < len(self.input_data):
             match = match_finder.find_longest_match(index)
-
             if match:
-                print("found match")
                 buffer.append(1)  # flag bit
                 (dist, length) = match
-                # dist is 12bits so BITWISE SHIFT right 4
-                byte1 = bytes([dist >> 4])
-                buffer.frombytes(byte1)
-                # BITWISE AND to leave 4 smallest bits
-                # shift left and BITWISE OR to add length (4bits)
-                byte2 = bytes([
-                    ((dist & 15) << 4)
-                    | length
-                ])
-                buffer.frombytes(byte2)
+                
+                dist_bits = bitarray(endian='little')
+                dist_bits.frombytes(
+                    int(dist).to_bytes(length=2, byteorder='little')
+                )
+                dist_bits = dist_bits[:12]
+                buffer.extend(dist_bits)
+                
+                length_bits = bitarray(endian='little')
+                length_bits.frombytes(
+                    int(length).to_bytes(length=1, byteorder='little')
+                )
+                length_bits = length_bits[:4]
+                buffer.extend(length_bits)
+
                 index += length
+                progress_bar.update(length)
 
             else:
                 buffer.append(0)  # flag bit
                 # character
                 buffer.frombytes(bytes([self.input_data[index]]))
                 index += 1
+                progress_bar.update(1)
+        progress_bar.close()
 
         buffer.fill()  # fills the last byte if not full
 
@@ -52,6 +62,7 @@ class LZ77:
         except IOError:
             print('Error open while decompress')
             raise
+        
         i = 0
         while i < len(data)-8:
             flag = data[i]
@@ -65,27 +76,16 @@ class LZ77:
                 i += 8
 
             else:  # flag == 1
-                byte1 = int.from_bytes(data[i: i+8], "big")
-                i += 8
-                byte2 = int.from_bytes(data[i: i+8], "big")
-                i += 8
 
-                # Example for bitwise operations
-                # byte1 00000001 byte2 11111111
-                # AFTER BITWISE SHIFTS
-                # byte1 000000010000 byte2 00001111
-                # AFTER BITWISE OR |
-                # 000000011111
-
-                relative_distance = (
-                    (byte1 << 4)
-                    |
-                    (byte2 >> 4)
+                relative_distance = ba2int(
+                    make_endian(data[i : i+12], endian='little')
                 )
+                i += 12
+                length = ba2int(
+                    make_endian(data[i : i+4], endian='little')
+                )
+                i += 4
 
-                # BITWISE AND &
-                # only 4 last bits
-                length = (byte2 & 15)
                 for len_i in range(length):
                     buffer.append(
                         buffer[-relative_distance]
