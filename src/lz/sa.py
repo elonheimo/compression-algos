@@ -1,9 +1,9 @@
 from collections import defaultdict
-from bisect import bisect, bisect_left, bisect_right
-from dis import dis
+from bisect import bisect_left, bisect_right
+
+
+
 # https://github.com/benfulton/Algorithmic-Alley/blob/master/AlgorithmicAlley/SuffixArrays/sa.py
-
-
 class SuffixArray:
     @staticmethod
     def suffix_array_manber_myers(data):
@@ -33,27 +33,19 @@ class MatchFinder:
             data[self.sa_left: self.sa_right+1]
         )
 
-    def sa_ref(self, i):
+    def sa_ref(self, start, length=1):
         # Returns the real data corresponding to relative sa_left
         # sa_left
-        return self.data[self.sa_left + i]
+        return self.data[self.sa_left + start : self.sa_left + start + length]
 
     def find_longest_match(self, i):
-        # init new suffix array if necessary
         if i >= self.sa_right and i != 0:
             self.sa_left = i - 4000
             self.sa_right = i + 4000
             self.sa = SuffixArray.suffix_array_manber_myers(
                 self.data[self.sa_left: self.sa_right + 1]
             )
-        #print("i",i,"sa", self.sa)
-        # find leftmost and rightmost match from search array
         left, right = self.binary_search_left_right(i)
-        #print(
-        #    "bs_left",left,self.data[self.sa[left]],
-        #    "bs_right", right, self.data[self.sa[right]]
-        #)
-        # if no match
         if left == -1:
             return None
 
@@ -117,7 +109,7 @@ class MatchFinder:
             right_ret = l
         
         return (left_ret, right_ret)
-    def binary_search_left_right(self, i :int) -> tuple:
+    def bcinary_search_left_right(self, i :int) -> tuple:
         ret_left , ret_right = -1, -1
         a = [self.sa_ref(x) for x in self.sa]
         ret_left = bisect_left(a, self.data[i])
@@ -125,3 +117,39 @@ class MatchFinder:
             return (-1, -1)
         ret_right = bisect_right(a, self.data[i]) -1
         return (ret_left, ret_right)
+
+    def binary_search_left_right(self, i: int) -> tuple:
+        target = self.data[i: i+2]
+        return (
+            self._bisect_left(target),
+            self._bisect_right(target)
+        )
+
+    def _bisect_left(self, target):
+        l, r = 0, len(self.sa) - 1
+        while l < r:
+            m = (l + r) // 2
+            if self.sa_ref(
+                self.sa[m], 2
+            ) < target:
+                l = m + 1
+            else:
+                r = m
+        return l if self.sa_ref(
+                self.sa[l], 2
+            ) == target else -1
+
+    def _bisect_right(self, target):
+        l, r = 0, len(self.sa) - 1
+        while l < r:
+            m = (l + r) // 2 + 1
+            if self.sa_ref(
+                self.sa[m], 2
+            ) > target:
+                r = m - 1
+            else:
+                l = m
+        return l if self.sa_ref(
+                self.sa[l], 2
+            )  == target else -1
+    
