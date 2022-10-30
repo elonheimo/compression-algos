@@ -1,10 +1,12 @@
 from collections import defaultdict
 from bisect import bisect_left, bisect_right
+from operator import ne
 
 
 
-# https://github.com/benfulton/Algorithmic-Alley/blob/master/AlgorithmicAlley/SuffixArrays/sa.py
 class SuffixArray:
+    # http://algorithmicalley.com/archive/2013/06/30/suffix-arrays.aspx
+    # Function made by Ben Fulton
     @staticmethod
     def suffix_array_manber_myers(data):
         result = []
@@ -22,23 +24,122 @@ class SuffixArray:
             return result
 
         return sort_bucket(data, (i for i in range(len(data))))
+    @staticmethod
+    def longest_common_prefix(og_inp: list, sa: list) -> list:
+        """Generates longest common prefix array 
+        Prefixes are the longest prefix in common with i and i-1
+        Therefore always lcp_array[0] = 0
+        Kasai et al. (2001) Time complexity: O(n)
+
+        Args:
+            og_inp (list): original input
+            sa (list): suffix array from input
+
+        Returns:
+            list: lcp_array
+        """
+        n = len(sa)
+        rank = [0] * n
+        for i in range(n):
+            rank[sa[i]] = i
+        lcp = [0] * n
+        l = 0
+        for i in range(1,n):
+
+            i_ = sa[rank[i] - 1]
+
+            while (i_ + l < n
+                    and i + l < n
+                    and og_inp[i + l] == og_inp[i_ + l]):
+                l += 1
+            lcp[rank[i]] = l
+            l = max(0, l - 1)
+        return lcp
 
 
 class MatchFinder:
     def __init__(self, data):
         self.data = data
         self.sa_left = 0
-        self.sa_right = 8000 if len(data) < 8000 else len(data)-1
+        if len(data) < 8000:
+            self.sa_right = len(data)-1
+        else:
+            self.sa_right = 8000
         self.sa = SuffixArray.suffix_array_manber_myers(
             data[self.sa_left: self.sa_right+1]
         )
+        self.lcp = SuffixArray.longest_common_prefix(
+            self.data[self.sa_left: self.sa_right+1], self.sa
+        )
+        self.left_right_sum = 0
+        self.left_right_count = 0
+        
 
     def sa_ref(self, start, length=1):
         # Returns the real data corresponding to relative sa_left
         # sa_left
         return self.data[self.sa_left + start : self.sa_left + start + length]
-
     def find_longest_match(self, i):
+        new = self.new_find_longest_match(i)
+        #old = self.old_find_longest_match(i)
+        #old = self.old_find_longest_match(i)
+        #if old and new and old != new:
+        #    print(f"new {new[0]: <10} {new[1]: <10} old {old[0]: <10} {old[1]: <10}")
+        return new
+    
+    def new_find_longest_match(self, i):
+        if i >= self.sa_right and i != 0:
+            self.sa_left = i - 4000 #
+            self.sa_right = i + 500 #
+            self.sa = SuffixArray.suffix_array_manber_myers(
+                self.data[self.sa_left: self.sa_right + 1]
+            )
+            self.lcp = SuffixArray.longest_common_prefix(
+                self.data[self.sa_left: self.sa_right+1], self.sa
+            )
+        left, right = self.binary_search_left_right(i)
+        if left == -1:
+            return None
+
+        best_length = 0
+        best_dist = None
+        length = 1
+        
+        for sa_i in range(left, right + 1):
+            dist = i - self.sa_left - self.sa[sa_i]
+
+            if self.lcp[sa_i] -1 < length:
+                length = 1
+                #print("len 1")
+
+            if 2 <= dist < 4000:
+
+                for len_i in range(1, 15):
+
+                    i_len = i + length
+ 
+                    if (i_len < len(self.data) -1
+                        and
+                        self.data[i_len] == self.data[i_len - dist]):
+                        length +=1
+                    else:
+                        break
+
+                if length > best_length:
+                    best_length = length
+                    best_dist = dist
+                    if length ==15:
+                        break
+                    
+
+        if best_length >= 2:
+            return (best_dist, best_length)
+        else:
+            return None
+
+        # search the longest matching pattern from the region
+
+    def old_find_longest_match(self, i):
         if i >= self.sa_right and i != 0:
             self.sa_left = i - 4000
             self.sa_right = i + 4000
@@ -72,8 +173,6 @@ class MatchFinder:
             return (best_dist, best_length)
         else:
             return None
-
-        # search the longest matching pattern from the region
 
     def bbinary_search_left_right(self, i :int) -> tuple:
         """ Searches the lfetmost and rightmost match in the suffix array

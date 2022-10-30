@@ -1,4 +1,3 @@
-from sys import byteorder
 from bitarray import bitarray
 from bitarray.util import ba2int, make_endian
 from tqdm import tqdm
@@ -21,7 +20,6 @@ class LZ77:
             if match:
                 buffer.append(1)  # flag bit
                 (dist, length) = match
-                
                 dist_bits = bitarray(endian='little')
                 dist_bits.frombytes(
                     int(dist).to_bytes(length=2, byteorder='little')
@@ -45,6 +43,7 @@ class LZ77:
                 buffer.frombytes(bytes([self.input_data[index]]))
                 index += 1
                 progress_bar.update(1)
+
         progress_bar.close()
 
         buffer.fill()  # fills the last byte if not full
