@@ -79,15 +79,8 @@ class MatchFinder:
         # Returns the real data corresponding to relative sa_left
         # sa_left
         return self.data[self.sa_left + start : self.sa_left + start + length]
-    def find_longest_match(self, i):
-        new = self.new_find_longest_match(i)
-        #old = self.old_find_longest_match(i)
-        #old = self.old_find_longest_match(i)
-        #if old and new and old != new:
-        #    print(f"new {new[0]: <10} {new[1]: <10} old {old[0]: <10} {old[1]: <10}")
-        return new
     
-    def new_find_longest_match(self, i):
+    def find_longest_match(self, i):
         if i >= self.sa_right and i != 0:
             self.sa_left = i - 4000 #
             self.sa_right = i + 500 #
@@ -104,13 +97,12 @@ class MatchFinder:
         best_length = 0
         best_dist = None
         length = 1
-        
+
         for sa_i in range(left, right + 1):
             dist = i - self.sa_left - self.sa[sa_i]
 
             if self.lcp[sa_i] -1 < length:
                 length = 1
-                #print("len 1")
 
             if 2 <= dist < 4000:
 
@@ -130,51 +122,13 @@ class MatchFinder:
                     best_dist = dist
                     if length ==15:
                         break
-                    
 
         if best_length >= 2:
             return (best_dist, best_length)
-        else:
-            return None
+        return None
 
-        # search the longest matching pattern from the region
 
-    def old_find_longest_match(self, i):
-        if i >= self.sa_right and i != 0:
-            self.sa_left = i - 4000
-            self.sa_right = i + 4000
-            self.sa = SuffixArray.suffix_array_manber_myers(
-                self.data[self.sa_left: self.sa_right + 1]
-            )
-        left, right = self.binary_search_left_right(i)
-        if left == -1:
-            return None
-
-        best_length = 0
-        best_dist = None
-        for sa_i in range(left, right + 1):
-            dist = i - self.sa_left - self.sa[sa_i]
-            if  dist <= 2:
-                continue
-            if 2 <= dist < 4000:
-                length = 1
-                for len_i in range(1, 15):
-                    if len(self.data) <= i+length:
-                        break  # new
-                    #print("len", len(self.data), "i+l", i+length)  # new
-                    if self.data[i+length] == self.data[i-dist+length]:
-                        if i+length < len(self.data):
-                            length += 1
-                    else:
-                        break  # new
-                if length > best_length:
-                    best_dist, best_length = dist, length
-        if best_length >= 2:
-            return (best_dist, best_length)
-        else:
-            return None
-
-    def bbinary_search_left_right(self, i :int) -> tuple:
+    def binary_search_left_right(self, i: int) -> tuple:
         """ Searches the lfetmost and rightmost match in the suffix array
 
         Args:
@@ -183,41 +137,6 @@ class MatchFinder:
         Returns:
             tuple: (left, right)
         """
-
-        left_ret, right_ret = -1, -1
-        # search left
-        l, r = 0, len(self.sa) - 1
-        while l < r:
-            m = (l + r) // 2
-            if self.sa_ref(m) < self.data[i]:
-                l = m + 1
-            else:
-                r = m
-        if self.sa_ref(l) == self.data[i]:
-            left_ret = l
-
-        # search right
-        l, r = 0, len(self.sa) - 1
-        while l < r:
-            m = (l + r) // 2 + 1
-            if self.sa_ref(m) > self.data[i]:
-                r = m - 1
-            else:
-                l = m
-        if self.sa_ref(l) == self.data[i]:
-            right_ret = l
-        
-        return (left_ret, right_ret)
-    def bcinary_search_left_right(self, i :int) -> tuple:
-        ret_left , ret_right = -1, -1
-        a = [self.sa_ref(x) for x in self.sa]
-        ret_left = bisect_left(a, self.data[i])
-        if self.sa_ref(self.sa[ret_left]) != self.data[i]:
-            return (-1, -1)
-        ret_right = bisect_right(a, self.data[i]) -1
-        return (ret_left, ret_right)
-
-    def binary_search_left_right(self, i: int) -> tuple:
         target = self.data[i: i+2]
         return (
             self._bisect_left(target),
