@@ -1,6 +1,7 @@
 from collections import defaultdict
 from bisect import bisect_left, bisect_right
 from operator import ne
+from typing import Tuple
 
 
 
@@ -75,15 +76,32 @@ class MatchFinder:
         self.left_right_count = 0
         
 
-    def sa_ref(self, start, length=1):
+    def sa_ref(self, start :int, length :int = 1) -> list:
+        """Return the real data that index referencing to suffix array contains.
+
+        Args:
+            start (int): 
+            length (int, optional): Defaults to 1.
+
+        Returns:
+            list: data
+        """
         # Returns the real data corresponding to relative sa_left
         # sa_left
         return self.data[self.sa_left + start : self.sa_left + start + length]
     
-    def find_longest_match(self, i):
+    def find_longest_match(self, i :int) -> Tuple:
+        """Find longest match in current suffix array
+
+        Args:
+            i (int): current index to byte that should be encoded<
+
+        Returns:
+            Tuple / None: Best distance from i and length of match.
+        """
         if i >= self.sa_right and i != 0:
             self.sa_left = i - 4000 #
-            self.sa_right = i + 500 #
+            self.sa_right = i + 4000 #
             self.sa = SuffixArray.suffix_array_manber_myers(
                 self.data[self.sa_left: self.sa_right + 1]
             )
@@ -129,7 +147,7 @@ class MatchFinder:
 
 
     def binary_search_left_right(self, i: int) -> tuple:
-        """ Searches the lfetmost and rightmost match in the suffix array
+        """ Searches the leftmost and rightmost match in the suffix array
 
         Args:
             i (int): index to real data

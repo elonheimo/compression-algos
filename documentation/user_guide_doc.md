@@ -20,13 +20,19 @@ Install [poetry](https://pypi.org/project/poetry/) if not installed.
 
 Run ```poetry install```
 
+Enter poetry shell
+```poetry shell```
+
 Further instructions on use are under command line interface.
 
 ## Cli, Command line interface
 
+Execute commands from poetry shell
+
 ### Example encode&decode file
 
 Encode
+
 
 ```python3 main.py -i <input file path> -o <output_file_path> <algorithm -lz or -hz>```
 

@@ -96,6 +96,11 @@ class LZ77:
             f.close()
 
     def read_input(self) -> bytes:
+        """Reads input file specified by the class.
+
+        Returns:
+            bytes: file data
+        """
         try:
             # rb = read binary
             with open(self.input_file_path, 'rb') as input_file:
@@ -103,11 +108,16 @@ class LZ77:
         except IOError:
             print(f"could not open {self.input_file_path}")
 
-    def save_output(self, buffer):
+    def save_output(self, buffer: bitarray) -> None:
+        """Saves bitarray to the output path specified by class
+
+        Args:
+            buffer (bitarray):
+        """
         try:
             # wb = write binary
             with open(self.output_file_path, 'wb') as output_file:
                 output_file.write(buffer.tobytes())
             print(f"Succesfully saved {self.output_file_path}")
         except IOError:
-            print("Error while saving output {file_path}")
+            print(f"Error while saving output {self.output_file_path}")
