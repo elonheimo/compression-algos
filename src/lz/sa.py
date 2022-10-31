@@ -1,6 +1,4 @@
 from collections import defaultdict
-from bisect import bisect_left, bisect_right
-from operator import ne
 from typing import Tuple
 
 
@@ -17,9 +15,11 @@ class SuffixArray:
             for i in bucket:
                 key = input_data[i:i+order]
                 dictionary[key].append(i)
-            for k, value in sorted(dictionary.items()): # pylint: disable= unused-variable
+            for _, value in sorted(dictionary.items()): # pylint: disable= unused-variable
                 if len(value) > 1:
-                    sort_bucket(input_data, value, order*2)
+                    sort_bucket(
+                        input_data, value, order*2
+                    )
                 else:
                     result.append(value[0])
             return result
