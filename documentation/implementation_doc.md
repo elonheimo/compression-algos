@@ -18,7 +18,7 @@ If there is no prior data to reference program saves 1 bit header and 8 bits of 
 
 If within the last 4095 bytes there is a 2 - 15 byte sequence that can be referenced then we use 1 bit header 12 bit for distance for matching region and 4 bits for the length of the region.
 
-If the length of the encoded data bitd is not divisible by 8, then the last byte is filled zero bits.
+If the length of the encoded data bit is not divisible by 8, then the last byte is filled zero bits.
 
 ### Time complexity
 
